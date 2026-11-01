@@ -1,0 +1,25 @@
+{
+  "name": "islamic-2d-animation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ইসলামী কাহিনীর ২ডি অ্যানিমেশন ভিডিও — React + Remotion + GitHub Actions",
+  "scripts": {
+    "start": "remotion studio index.ts",
+    "build": "remotion render index.ts Story out/video.mp4",
+    "typecheck": "tsc --noEmit",
+    "tts": "python tts.py"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.200",
+    "@remotion/google-fonts": "4.0.200",
+    "@remotion/media-utils": "4.0.200",
+    "@remotion/transitions": "4.0.200",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.200"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "typescript": "5.4.5"
+  }
+}

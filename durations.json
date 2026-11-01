@@ -1,0 +1,13 @@
+{
+  "generated": false,
+  "note": "এটি ডিফল্ট (ফলব্যাক) সময়। tts.py চালালে প্রকৃত অডিও দৈর্ঘ্য দিয়ে এই ফাইল নিজে থেকে আপডেট হবে।",
+  "scenes": [
+    { "id": "s0-title", "seconds": 4 },
+    { "id": "s1-atheist", "seconds": 9 },
+    { "id": "s2-topic", "seconds": 5 },
+    { "id": "s3-crowd", "seconds": 11 },
+    { "id": "s4-atheist-arrives", "seconds": 4 },
+    { "id": "s5-delay", "seconds": 8 },
+    { "id": "s6-question", "seconds": 6 }
+  ]
+}

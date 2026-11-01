@@ -1,0 +1,7 @@
+# রান-টাইমে তৈরি হয়, কমিট করার দরকার নেই
+node_modules/
+out/
+public/
+*.log
+.DS_Store
+.remotion/
