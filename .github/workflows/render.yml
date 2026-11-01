@@ -1,1 +1,101 @@
+name: Render Video
 
+on:
+  workflow_dispatch:
+    inputs:
+      scale:
+        description: "রেজোলিউশন স্কেল (টেস্টের জন্য 0.5, চূড়ান্তের জন্য 1)"
+        required: false
+        default: "1"
+      release:
+        description: "রেন্ডার শেষে GitHub Release বানাবে? (true/false)"
+        required: false
+        default: "false"
+  push:
+    branches: [main]
+    paths:
+      - "script.json"
+      - "script.ts"
+      - "scenes.tsx"
+      - "Story.tsx"
+      - "characters.tsx"
+      - "components.tsx"
+      - "Subtitle.tsx"
+      - "theme.ts"
+      - "Root.tsx"
+      - "tts.py"
+      - ".github/workflows/render.yml"
+
+permissions:
+  contents: write # Release বানানোর জন্য
+
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: সিস্টেম প্যাকেজ (ffmpeg, বাংলা ফন্ট, Chromium-এর লাইব্রেরি)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto fonts-noto-core fontconfig \
+            libnss3 libdbus-1-3 libatk1.0-0 libgbm-dev libasound2t64 \
+            libxrandr2 libxkbcommon-dev libxfixes3 libxcomposite1 \
+            libxdamage1 libatk-bridge2.0-0 libpango-1.0-0 libcairo2 libcups2
+          fc-cache -f
+
+      - name: Python ডিপেন্ডেন্সি
+        run: pip install -r requirements.txt
+
+      - name: Node ডিপেন্ডেন্সি
+        run: npm install --no-audit --no-fund
+
+      - name: টাইপ চেক (ভুল থাকলে এখানেই থামবে)
+        run: npx tsc --noEmit
+
+      - name: বাংলা ভয়েসওভার তৈরি (edge-tts)
+        run: |
+          mkdir -p public
+          python tts.py --strict
+
+      - name: durations.json দেখা
+        run: cat durations.json
+
+      - name: ভিডিও রেন্ডার
+        run: |
+          mkdir -p out
+          SCALE="${{ github.event.inputs.scale || '1' }}"
+          npx remotion render index.ts Story out/video.mp4 \
+            --concurrency=2 --scale="$SCALE"
+
+      - name: ভিডিও আর্টিফ্যাক্ট আপলোড
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: out/video.mp4
+          retention-days: 30
+
+      - name: GitHub Release (ঐচ্ছিক)
+        if: ${{ github.event.inputs.release == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: video-${{ github.run_number }}
+          name: ভিডিও #${{ github.run_number }}
+          files: out/video.mp4
